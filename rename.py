@@ -9,27 +9,33 @@ verbose_param = '-v'
 script_name = ""
 old_name = ""
 new_name = ""
+change_everything = True
+change_files_content = False
+change_files_names = False
+change_folders_names = False
+change_files_content_param = '-fc'
+change_files_names_param = '-fn'
+change_folders_names_param = '-dn'
+old_name_param = '-o'
+new_name_param = '-n'
 
-## Find Replace interno dos arquivos
-grep_old_name_in_files_cmd = 'grep -rl $ .'
+grep_old_name_in_files_cmd = 'grep -rl $ . --exclude-dir=.git'
 sed_regex_cmd = 's/$/$/g'
 sed_file_cmd = 'sed -i \"\" -e \"$\" $'
 git_diff_color_cmd = 'git diff --color | cat'
 git_restore_cmd = 'git restore -- .'
 
-## Rename do nome dos arquivos
 find_files_to_rename_cmd = 'find . -type f -name \"*$*\"'
 
-## Rename de diretorios
 find_directories_to_rename_cmd = 'find . -type d | grep $'
 
 def log_msg(msg):
     if verbose_mode:
         print(msg)
 
-# Detecta se o script está em modo dry_run, somente apresenta as alterações mas não realiza nada nos arquivos e diretórios
 def detect_dry_run_and_verbose(arg_list):
-    global dry_run, verbose_mode, help_mode
+    global dry_run, verbose_mode
+
     result = []
     for arg in arg_list:
         if arg == verbose_param:
@@ -41,9 +47,27 @@ def detect_dry_run_and_verbose(arg_list):
 
     return result
 
-# Valida se os inputs estão corretos
+def set_parameters(arg_list):
+    global change_files_names, change_files_content, change_folders_names, change_everything
+
+    result = []
+    for arg in arg_list:
+        if arg == change_files_content_param:
+            change_everything = False
+            change_files_content = True
+        elif arg == change_files_names_param:
+            change_everything = False
+            change_files_names = True
+        elif arg == change_folders_names_param:
+            change_everything = False
+            change_folders_names = True
+        else:
+            result.append(arg)
+
+    return result
+
 def validate_inputs(arg_list):
-    global old_name, new_name, script_name
+    global old_name, new_name, script_name, sed_regex_cmd, sed_file_cmd
     script_name = arg_list[0]
     old_name = arg_list[1]
     new_name = arg_list[2]
@@ -54,22 +78,27 @@ def validate_inputs(arg_list):
     if len(new_name) == 0:
         sys.exit('New name empty')
 
-def initialize():
-    global old_name, new_name, script_name, sed_regex_cmd, sed_file_cmd
-
-    arg_list = detect_dry_run_and_verbose(sys.argv)
-
-    log_msg('Rename files script initialize\n')
-    if dry_run:
-        log_msg('*** Dry run detected, no changes will be made ***\n')
-
-    validate_inputs(arg_list)
-
     sed_regex_cmd = sed_regex_cmd.replace('$', old_name, 1).replace('$', new_name, 1)
     sed_file_cmd = sed_file_cmd.replace('$', sed_regex_cmd, 1)
 
-    log_msg('Old name: ' + old_name)
-    log_msg('New name: ' + new_name + '\n')
+def show_params_status():
+    log_msg('Rename files script initialize')
+    log_msg('')
+    log_msg('Dry run     : ' + str(dry_run))
+    log_msg('Verbose     : ' + str(verbose_mode))
+    log_msg('File Content: ' + str(change_files_content))
+    log_msg('File Names  : ' + str(change_files_names))
+    log_msg('Dirs Names  : ' + str(change_folders_names))
+    log_msg('Change All  : ' + str(change_everything))
+    log_msg('Old name    : ' + old_name)
+    log_msg('New name    : ' + new_name)
+    log_msg('')
+
+def initialize():
+    arg_list = detect_dry_run_and_verbose(sys.argv)
+    arg_list = set_parameters(arg_list)
+    validate_inputs(arg_list)
+    show_params_status()
 
 def exec_sheel_cmd(cmd):
     log_msg('exec sheel cmd: ' + cmd)
@@ -101,6 +130,9 @@ def git_restore():
     os.system(git_restore_cmd)
 
 def process_file_content():
+    if change_files_content == False & change_everything == False:
+        return
+    
     for file in grep_old_name():
         change_file_content(file)
 
@@ -126,6 +158,9 @@ def rename_file_or_directory(old_path):
         shutil.move(old_path, new_path)
 
 def process_rename_files():
+    if change_files_names == False & change_everything == False:
+        return
+
     for file in find_files_to_rename():
         rename_file_or_directory(file)
 
@@ -137,6 +172,9 @@ def remove_duplicate_and_reverse_order(dir_list):
     return list(dict.fromkeys(dir_list)).reverse()
 
 def process_rename_directories():
+    if change_folders_names == False & change_everything == False:
+        return
+
     final_list = []
     for dir in find_directories_to_rename():
         index = dir.rfind(old_name)
@@ -153,11 +191,6 @@ def process_rename_directories():
     for dir in ordered_list:
         rename_file_or_directory(dir)
 
-def printHelp():
-    print('Rename files content, files name and folders recursively')
-    print('v1.0')
-    print('Leonardo Saragiotto - leonardo.saragiotto@gmail.com')
-        
 def process():
     process_file_content()
     process_rename_files()
