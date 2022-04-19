@@ -6,8 +6,6 @@ dry_run = False
 dry_run_param = '--dry-run'
 verbose_mode = False
 verbose_param = '-v'
-help_mode = False
-help_param = '-h'
 script_name = ""
 old_name = ""
 new_name = ""
@@ -38,8 +36,6 @@ def detect_dry_run_and_verbose(arg_list):
             verbose_mode = True
         elif arg == dry_run_param:
             dry_run = True
-        elif arg == help_param:
-            help_mode = True
         else:
             result.append(arg)
 
@@ -66,9 +62,6 @@ def initialize():
     log_msg('Rename files script initialize\n')
     if dry_run:
         log_msg('*** Dry run detected, no changes will be made ***\n')
-
-    if help_mode:
-        return
 
     validate_inputs(arg_list)
 
@@ -166,10 +159,6 @@ def printHelp():
     print('Leonardo Saragiotto - leonardo.saragiotto@gmail.com')
         
 def process():
-    if help_mode:
-        printHelp()
-        return
-
     process_file_content()
     process_rename_files()
     process_rename_directories()

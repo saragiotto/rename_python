@@ -1,6 +1,6 @@
 # Rename Script
 
-Rename files content, files name and folders recursivily.
+Rename files content, files name and folders recursively.
 
 ### Usage
 
@@ -21,4 +21,4 @@ Given this folder and file location:
 `src/controller/OldNameController/OldNameControllerHelper/OldNameHelper.js`
 
 After the execution, the result will be this:
-`src/controler/NewLongNameController/NewLongNameControllerHelper/NewLongNameHelper.js`
+`src/controller/NewLongNameController/NewLongNameControllerHelper/NewLongNameHelper.js`
