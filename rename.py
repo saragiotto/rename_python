@@ -130,8 +130,9 @@ def git_restore():
     os.system(git_restore_cmd)
 
 def process_file_content():
-    if change_files_content == False & change_everything == False:
-        return
+    if change_everything == False:
+        if change_files_content == False:
+            return
     
     for file in grep_old_name():
         change_file_content(file)
@@ -158,8 +159,9 @@ def rename_file_or_directory(old_path):
         shutil.move(old_path, new_path)
 
 def process_rename_files():
-    if change_files_names == False & change_everything == False:
-        return
+    if change_everything == False:
+        if change_files_names == False:
+            return
 
     for file in find_files_to_rename():
         rename_file_or_directory(file)
@@ -172,8 +174,9 @@ def remove_duplicate_and_reverse_order(dir_list):
     return list(dict.fromkeys(dir_list)).reverse()
 
 def process_rename_directories():
-    if change_folders_names == False & change_everything == False:
-        return
+    if change_everything == False:
+        if change_folders_names == False:
+            return
 
     final_list = []
     for dir in find_directories_to_rename():
