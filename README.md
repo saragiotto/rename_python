@@ -50,3 +50,7 @@ Given this folder and file location:
 
 After the execution, the result will be this:
 `src/controller/NewLongNameController/NewLongNameControllerHelper/NewLongNameHelper.js`
+
+## Add Texto to Fire Hooks
+
+This should fire some new webhooks.
